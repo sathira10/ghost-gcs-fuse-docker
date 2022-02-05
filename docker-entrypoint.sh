@@ -21,7 +21,7 @@ if [[ "$*" == node*current/index.js* ]]; then
 fi
 
 echo "Mounting GCS Fuse."
-gcsfuse --uid=1000 --foreground --implicit-dirs --debug_gcs --debug_fuse $BUCKET $MNT_DIR 
+gcsfuse --uid=1000 --implicit-dirs --debug_gcs --debug_fuse $BUCKET $MNT_DIR 
 echo "Mounting completed."
 
 # echo "writing" 
