@@ -1,9 +1,6 @@
 #!/bin/bash
-set -e
-
-echo "Mounting GCS Fuse."
-gcsfuse --debug_gcs --debug_fuse $BUCKET $MNT_DIR 
-echo "Mounting completed."
+# set -e
+set -eo pipefail
 
 # allow the container to be started with `--user`
 if [[ "$*" == node*current/index.js* ]] && [ "$(id -u)" = '0' ]; then
@@ -23,4 +20,13 @@ if [[ "$*" == node*current/index.js* ]]; then
 	done
 fi
 
-exec "$@"
+echo "Mounting GCS Fuse."
+gcsfuse --uid=1000 --foreground --implicit-dirs --debug_gcs --debug_fuse $BUCKET $MNT_DIR 
+echo "Mounting completed."
+
+echo "node started" > content/myfile.txt
+# exec "$@"
+# exec node current/index.js --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app &
+
+# Exit immediately when one of the background processes terminate.
+wait -n
