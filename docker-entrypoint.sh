@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+echo "Mounting GCS Fuse."
+gcsfuse --debug_gcs --debug_fuse $BUCKET $MNT_DIR 
+echo "Mounting completed."
+
 # allow the container to be started with `--user`
 if [[ "$*" == node*current/index.js* ]] && [ "$(id -u)" = '0' ]; then
 	find "$GHOST_CONTENT" \! -user node -exec chown node '{}' +

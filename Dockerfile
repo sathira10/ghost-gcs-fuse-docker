@@ -1,11 +1,28 @@
 # https://docs.ghost.org/faq/node-versions/
 # https://github.com/nodejs/Release (looking for "LTS")
 # https://github.com/TryGhost/Ghost/blob/v4.1.2/package.json#L38
-FROM node:14-bullseye-slim
+FROM node:14-buster-slim
 
 # grab gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
 ENV GOSU_VERSION 1.12
+
+# Install system dependencies
+RUN set -e; \
+    apt-get update -y && apt-get install -y \
+	gnupg2 \
+	curl \
+    tini \
+    lsb-release; \
+    gcsFuseRepo=gcsfuse-`lsb_release -c -s`; \
+    echo "deb http://packages.cloud.google.com/apt $gcsFuseRepo main" | \
+    tee /etc/apt/sources.list.d/gcsfuse.list; \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    apt-key add -; \
+    apt-get update; \
+    apt-get install -y gcsfuse \
+    && apt-get clean
+
 RUN set -eux; \
 # save list of currently installed packages for later so we can clean up
 	savedAptMark="$(apt-mark showmanual)"; \
