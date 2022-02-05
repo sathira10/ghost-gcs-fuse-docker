@@ -11,6 +11,7 @@ RUN usermod -G sudo node
 # Install system dependencies
 RUN set -e; \
 	apt-get update -y && apt-get install -y \
+	ca-certificates \
 	gnupg2 \
 	curl \
 	tini \
@@ -109,6 +110,9 @@ RUN set -eux; \
 	gosu node npm cache clean --force; \
 	npm cache clean --force; \
 	rm -rv /tmp/yarn* /tmp/v8*
+
+# RUN curl -sSL https://sdk.cloud.google.com | bash
+RUN update-ca-certificates
 
 WORKDIR $GHOST_INSTALL
 # VOLUME $GHOST_CONTENT

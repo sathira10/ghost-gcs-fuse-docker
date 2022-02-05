@@ -24,9 +24,12 @@ echo "Mounting GCS Fuse."
 gcsfuse --uid=1000 --foreground --implicit-dirs --debug_gcs --debug_fuse $BUCKET $MNT_DIR 
 echo "Mounting completed."
 
-echo "node started" > content/myfile.txt
+# echo "writing" 
+# gosu node echo "node started" > content/myfile.txt
+# echo "done"
+
 # exec "$@"
-# exec node current/index.js --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app &
+exec node current/index.js &
 
 # Exit immediately when one of the background processes terminate.
 wait -n
