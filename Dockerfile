@@ -69,7 +69,7 @@ RUN set -eux; \
 	mkdir -p "$GHOST_INSTALL"; \
 	chown node:node "$GHOST_INSTALL"; \
 	\
-	gosu node ghost install "$GHOST_VERSION" --db sqlite3 --no-prompt --no-stack --no-setup --dir "$GHOST_INSTALL"; \
+	gosu node ghost install "$GHOST_VERSION" --db=sqlite3 --no-prompt --no-stack --no-setup --dir "$GHOST_INSTALL"; \
 	\
 	# Tell Ghost to listen on all ips and not prompt for additional configuration
 	cd "$GHOST_INSTALL"; \
@@ -86,42 +86,18 @@ RUN set -eux; \
 	chown node:node "$GHOST_CONTENT"; \
 	chmod 1777 "$GHOST_CONTENT"; \
 	\
-	# force install "sqlite3" manually since it's an optional dependency of "ghost"
-	# (which means that if it fails to install, like on ARM/ppc64le/s390x, the failure will be silently ignored and thus turn into a runtime error instead)
-	# see https://github.com/TryGhost/Ghost/pull/7677 for more details
-	cd "$GHOST_INSTALL/current"; \
-	# scrape the expected version of sqlite3 directly from Ghost itself
-	sqlite3Version="$(node -p 'require("./package.json").optionalDependencies.sqlite3')"; \
-	if ! gosu node yarn add "sqlite3@$sqlite3Version" --force; then \
-	# must be some non-amd64 architecture pre-built binaries aren't published for, so let's install some build deps and do-it-all-over-again
-	savedAptMark="$(apt-mark showmanual)"; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends g++ gcc libc-dev libvips-dev make python2; \
-	rm -rf /var/lib/apt/lists/*; \
-	\
-	npm_config_python='python2' gosu node yarn add "sqlite3@$sqlite3Version" --force --build-from-source --ignore-optional; \
-	\
-	apt-mark showmanual | xargs apt-mark auto > /dev/null; \
-	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
-	apt-get purge -y --auto-remove; \
-	fi; \
-	\
 	gosu node yarn cache clean; \
 	gosu node npm cache clean --force; \
 	npm cache clean --force; \
 	rm -rv /tmp/yarn* /tmp/v8*
 
-# RUN curl -sSL https://sdk.cloud.google.com | bash
 RUN update-ca-certificates
 
 WORKDIR $GHOST_INSTALL
-# VOLUME $GHOST_CONTENT
 
 COPY docker-entrypoint.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-# ENTRYPOINT ["docker-entrypoint.sh"]
 ENTRYPOINT ["/usr/bin/tini", "--"] 
 
 EXPOSE 2368
-# CMD ["node", "current/index.js"]
 CMD ["/usr/local/bin/docker-entrypoint.sh"]

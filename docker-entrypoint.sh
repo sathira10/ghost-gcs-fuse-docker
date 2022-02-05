@@ -1,5 +1,4 @@
 #!/bin/bash
-# set -e
 set -eo pipefail
 
 # allow the container to be started with `--user`
@@ -23,10 +22,6 @@ fi
 echo "Mounting GCS Fuse."
 gcsfuse --uid=1000 --implicit-dirs --debug_gcs --debug_fuse $BUCKET $MNT_DIR 
 echo "Mounting completed."
-
-# echo "writing" 
-# gosu node echo "node started" > content/myfile.txt
-# echo "done"
 
 # exec "$@"
 exec node current/index.js &
